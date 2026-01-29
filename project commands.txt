@@ -1,0 +1,5 @@
+cd ~/PredictiveRiskAnalyzer #Navigate the project directory
+source venv/bin/activate #Activate your Virtual Environment
+pip install flask pandas scikit-learn joblib #Ensure all libraries are installed
+python3 train_model.py #Train the model
+python3 app.py # run the server

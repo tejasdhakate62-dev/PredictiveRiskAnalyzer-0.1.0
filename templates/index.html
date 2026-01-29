@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Analyzer Pro | Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-deep: #0f172a;
+            --card-bg: #1e293b;
+            --accent-cyan: #22d3ee;
+            --accent-gold: #fbbf24;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            width: 95%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* --- Input Sidebar --- */
+        .sidebar {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 30px;
+            border-radius: 18px;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        h2 { font-size: 1.5rem; margin-bottom: 25px; color: var(--accent-cyan); }
+        
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            transition: border 0.3s;
+            box-sizing: border-box;
+        }
+
+        input:focus { border-color: var(--accent-cyan); outline: none; }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-predict { background: var(--accent-cyan); color: #083344; margin-top: 10px; }
+        .btn-predict:hover { transform: translateY(-2px); box-shadow: 0 0 15px rgba(34, 211, 238, 0.4); }
+
+        /* --- Results Display --- */
+        .main-panel {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .placeholder-text { color: var(--text-dim); font-style: italic; }
+
+        .result-grid {
+            display: none;
+            width: 100%;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: #334155;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+        }
+
+        .risk-badge {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            margin: 10px 0;
+        }
+
+        .chart-box {
+            grid-column: span 2;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 20px;
+            height: 300px;
+        }
+
+        .action-btns {
+            grid-column: span 2;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-download { background: transparent; border: 1px solid var(--text-dim); color: white; }
+        .btn-download:hover { background: white; color: black; }
+
+        @media (max-width: 850px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+            .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container" id="captureArea">
+    <div class="sidebar">
+    <h2>Risk Parameters</h2>
+    <form id="riskForm">
+        <div class="input-group">
+            <label>Budget (INR)</label>
+            <input type="number" name="budget" placeholder="Min: 10000" min="10000" max="100000000" required>
+        </div>
+        <div class="input-group">
+    <label>Team Size</label>
+    <input type="number" name="teamSize" placeholder="e.g. 10" min="1" max="100" required>
+</div>
+        <div class="input-group">
+            <label>Duration (Months)</label>
+            <input type="number" name="duration" placeholder="1-60 months" min="1" max="60" required>
+        </div>
+        <div class="input-group">
+            <label>Team Experience (Yrs)</label>
+            <input type="number" name="experience" placeholder="1-50 years" min="1" max="50" required>
+        </div>
+        <div class="input-group">
+            <label>Complexity (1-10)</label>
+            <input type="number" name="rework" placeholder="1 = Low, 10 = High" min="1" max="10" required>
+        </div>
+        <button type="submit" class="btn-predict">Analyze Risk Profile</button>
+    </form>
+</div>
+
+    <div class="main-panel" id="mainPanel">
+        <div id="placeholder">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-dim); margin-bottom: 20px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+            <p class="placeholder-text">Enter project data to generate predictive analysis.</p>
+        </div>
+
+        <div class="result-grid" id="resultGrid">
+            <div class="stat-card">
+                <label>Calculated Risk Score</label>
+                <div class="risk-badge" id="scoreDisplay">0.0</div>
+                <p id="riskLevel" style="font-weight: bold;"></p>
+            </div>
+            <div class="stat-card">
+                <label>Summary</label>
+                <p id="summaryText" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-dim);"></p>
+            </div>
+            <div class="chart-box">
+                <canvas id="analysisChart"></canvas>
+            </div>
+            <div class="action-btns">
+                <button class="btn-download" onclick="downloadPDF()">Export PDF Report</button>
+                <button class="btn-download" style="border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="location.reload()">Reset</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('riskForm');
+    let analysisChart;
+
+    // --- FIX: LEADING ZERO PREVENTION ---
+    const inputs = document.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.length > 1 && this.value[0] === '0') {
+                this.value = this.value.replace(/^0+/, '');
+            }
+        });
+    });
+
+    // --- FIX: FLASK API CONNECTION ---
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Show loading state (optional)
+        document.getElementById('scoreDisplay').innerText = "...";
+        
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+
+        try {
+            // Send data to your Ubuntu Flask Server
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error("Server not responding");
+
+            const result = await response.json();
+            const finalScore = result.risk_score; // Score from risk_model.pkl
+
+            // Update UI
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('resultGrid').style.display = 'grid';
+            document.getElementById('scoreDisplay').innerText = finalScore;
+            
+            // Logic for colors based on the AI score
+            let level = "Low Risk";
+            let color = "#22d3ee"; // Cyan
+            if(finalScore > 4) { level = "Medium Risk"; color = "#fbbf24"; } // Gold
+            if(finalScore > 7) { level = "High Risk"; color = "#ef4444"; } // Red
+            
+            document.getElementById('riskLevel').innerText = level;
+            document.getElementById('riskLevel').style.color = color;
+            
+            const budgetFormatted = parseInt(payload.budget).toLocaleString();
+            document.getElementById('summaryText').innerText = `Based on a budget of ₹${budgetFormatted}, the AI model predicts a ${level} profile. Recommended: Ensure rigorous milestone tracking.`;
+
+            renderChart(finalScore, color);
+
+        } catch (err) {
+            alert("Error: Make sure your Flask app.py is running! (" + err.message + ")");
+        }
+    });
+
+    function renderChart(score, color) {
+        const ctx = document.getElementById('analysisChart').getContext('2d');
+        if(analysisChart) analysisChart.destroy();
+        
+        analysisChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Complexity', 'Timeline', 'Resource Gap', 'Budget Stress'],
+                datasets: [{
+                    label: 'Risk Weight',
+                    data: [score * 0.8, score * 0.5, score * 0.3, score * 0.6],
+                    backgroundColor: color,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.1)' } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+    }
+
+   async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const accentColor = [34, 211, 238]; // Your Cyan RGB
+    
+    // --- 1. CORPORATE HEADER ---
+    doc.setFillColor(15, 23, 42); // Dark Blue Background
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text("PROJECT RISK ANALYSIS REPORT", 15, 20);
+    
+    doc.setFontSize(10);
+    doc.text(`DATE: ${new Date().toLocaleDateString()}`, 15, 30);
+    doc.text("CONFIDENTIAL - FOR INTERNAL USE ONLY", 120, 30);
+
+    // --- 2. PROJECT SUMMARY SECTION ---
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("1. EXECUTIVE SUMMARY", 15, 55);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    const score = document.getElementById('scoreDisplay').innerText;
+    const level = document.getElementById('riskLevel').innerText;
+    doc.text(`Assessed Risk Score: ${score}/10.0`, 15, 65);
+    doc.text(`Risk Classification: ${level}`, 15, 72);
+
+    // --- 3. INPUT PARAMETERS (The Data) ---
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, 80, 195, 80);
+    doc.setFont("helvetica", "bold");
+    doc.text("2. PROJECT PARAMETERS", 15, 90);
+    
+    const formData = new FormData(document.getElementById('riskForm'));
+    let yPos = 100;
+    doc.setFont("helvetica", "normal");
+    
+    for (let [key, value] of formData.entries()) {
+        const label = key.charAt(0).toUpperCase() + key.slice(1);
+        doc.text(`${label}:`, 15, yPos);
+        doc.text(`${value}`, 60, yPos);
+        yPos += 8;
+    }
+
+    // --- 4. DATA VISUALIZATION CAPTURE ---
+    doc.setFont("helvetica", "bold");
+    doc.text("3. RISK DISTRIBUTION ANALYSIS", 15, 155);
+    
+    const chartCanvas = document.getElementById('analysisChart');
+    const chartImg = chartCanvas.toDataURL("image/png", 1.0);
+    doc.addImage(chartImg, 'PNG', 15, 165, 180, 80);
+
+    // --- 5. CORPORATE FOOTER ---
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Generated by PredictiveRiskAnalyzer AI Engine", 15, 285);
+    doc.text("Page 1 of 1", 185, 285);
+
+    // Save File
+    doc.save(`Project_Risk_Report_${new Date().getTime()}.pdf`);
+    }
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
