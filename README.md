@@ -1,0 +1,25 @@
+# PredictiveRiskAnalyzer 🛡️
+
+An end-to-end Machine Learning web application designed to predict and analyze potential risks using Python and Flask.
+
+## 🚀 Overview
+This project utilizes a trained classification model to evaluate risk factors based on user-provided data. It features a clean UI for input and provides real-time risk assessments.
+
+## 🛠️ Tech Stack
+* **Language:** Python 3.x
+* **Web Framework:** Flask
+* **Machine Learning:** Scikit-learn, Pandas, NumPy
+* **Data Handling:** Joblib/Pickle for model serialization
+
+## 📂 Project Structure
+* `app.py`: The main Flask application script.
+* `train_model.py`: Script used for data preprocessing and model training.
+* `risk_model.pkl`: The serialized (trained) machine learning model.
+* `templates/`: HTML files for the web interface.
+* `project_data_100k.csv`: Dataset used for training and validation.
+
+## ⚙️ Installation & Usage
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/tejasdhakate62-dev/PredictiveRiskAnalyzer.git](https://github.com/tejasdhakate62-dev/PredictiveRiskAnalyzer.git)
+   cd PredictiveRiskAnalyzer
