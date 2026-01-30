@@ -30,3 +30,7 @@ Run Project Commands For Linux/Ubuntu/Fedora:
 * `python3 train_model.py`: Train the model.
 * `python3 app.py`: Run the server.
 <img width="1920" height="1080" alt="Screenshot From 2026-01-25 21-22-34" src="https://github.com/user-attachments/assets/6552340b-0513-4d65-b0ac-0e6c2772f6c0" />
+<img width="1376" height="769" alt="Screenshot From 2026-01-25 22-01-17" src="https://github.com/user-attachments/assets/3020d7c4-9fee-4383-b16f-94da645e4805" />
+<img width="1920" height="1080" alt="Screenshot From 2026-01-26 20-43-54" src="https://github.com/user-attachments/assets/4e847093-e2e1-434f-8c9d-89805488ba6e" />
+<img width="1920" height="1080" alt="Screenshot From 2026-01-29 20-21-11" src="https://github.com/user-attachments/assets/d5fe8fbd-a15d-4718-b2e5-cce26a9a4e5f" />
+<img width="1920" height="1080" alt="Screenshot From 2026-01-29 20-22-09" src="https://github.com/user-attachments/assets/ea6453e7-5625-4b70-af92-9c505a4c4e11" />
