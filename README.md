@@ -29,3 +29,4 @@ Run Project Commands For Linux/Ubuntu/Fedora:
 * `pip install flask pandas scikit-learn joblib`: Ensure all libraries are installed.
 * `python3 train_model.py`: Train the model.
 * `python3 app.py`: Run the server.
+<img width="1920" height="1080" alt="Screenshot From 2026-01-25 21-22-34" src="https://github.com/user-attachments/assets/6552340b-0513-4d65-b0ac-0e6c2772f6c0" />
