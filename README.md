@@ -23,9 +23,9 @@ This project utilizes a trained classification model to evaluate risk factors ba
    ```bash
    git clone [https://github.com/tejasdhakate62-dev/PredictiveRiskAnalyzer.git](https://github.com/tejasdhakate62-dev/PredictiveRiskAnalyzer.git)
    cd PredictiveRiskAnalyzer
-Run Project Commands:
-`cd ~/PredictiveRiskAnalyzer`: Navigate the project directory.
-`source venv/bin/activate`: Activate your Virtual Environment.
-`pip install flask pandas scikit-learn joblib`: Ensure all libraries are installed.
-`python3 train_model.py`: Train the model.
-`python3 app.py`: Run the server.
+Run Project Commands For Linux/Ubuntu/Fedora:
+* `cd ~/PredictiveRiskAnalyzer`: Navigate the project directory.
+* `source venv/bin/activate`: Activate your Virtual Environment.
+* `pip install flask pandas scikit-learn joblib`: Ensure all libraries are installed.
+* `python3 train_model.py`: Train the model.
+* `python3 app.py`: Run the server.
