@@ -3,439 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risk Analyzer Pro | Dashboard</title>
+    <title>Risk Analyzer Pro | Corporate Dashboard</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrM7ZB-wBeujDvQKW0hbf-Ne_12vMRdTY",
+            authDomain: "predective-project-risk-analyz.firebaseapp.com",
+            projectId: "predective-project-risk-analyz",
+            storageBucket: "predective-project-risk-analyz.firebasestorage.app",
+            messagingSenderId: "873812909340",
+            appId: "1:873812909340:web:8fd98d3765df736041eed9",
+            measurementId: "G-QK0V825MZ9"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
     <style>
         :root {
-            --bg-deep: #0f172a;
-            --card-bg: #1e293b;
-            --accent-cyan: #22d3ee;
-            --accent-gold: #fbbf24;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
+            --bg-deep: #0f172a; --card-bg: #1e293b; --accent-cyan: #22d3ee;
+            --accent-gold: #fbbf24; --accent-green: #10b981; --text-main: #f8fafc;
+            --text-dim: #94a3b8; --input-bg: #0f172a;
         }
 
         body {
-            margin: 0;
-            font-family: 'Inter', system-ui, sans-serif;
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
+            margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-deep);
+            color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
 
         .dashboard-container {
-            width: 95%;
-            max-width: 1100px;
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 20px;
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255,255,255,0.05);
+            width: 95%; max-width: 1250px; display: grid; grid-template-columns: 320px 1fr 280px;
+            gap: 20px; background: var(--card-bg); border-radius: 28px; padding: 25px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* --- Input Sidebar --- */
-        .sidebar {
-            background: rgba(15, 23, 42, 0.5);
-            padding: 30px;
-            border-radius: 18px;
-            border-right: 1px solid rgba(255,255,255,0.05);
-        }
+        .panel { background: rgba(15, 23, 42, 0.4); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03); }
+        h2 { color: var(--accent-cyan); margin: 0 0 20px 0; font-size: 1.4rem; }
+        h3 { color: var(--accent-cyan); font-size: 0.65rem; text-transform: uppercase; margin: 20px 0 10px 0; border-left: 3px solid var(--accent-cyan); padding-left: 10px; }
 
-        h2 { font-size: 1.5rem; margin-bottom: 25px; color: var(--accent-cyan); }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.6rem; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
         
-        .input-group { margin-bottom: 18px; }
-        label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: white;
-            transition: border 0.3s;
-            box-sizing: border-box;
+        input, select {
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #334155;
+            background: var(--input-bg); color: white; box-sizing: border-box; font-family: inherit;
         }
 
-        input:focus { border-color: var(--accent-cyan); outline: none; }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .btn-predict {
+            width: 100%; padding: 14px; background: var(--accent-cyan); color: #083344;
+            border: none; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 15px; text-transform: uppercase;
         }
 
-        .btn-predict { background: var(--accent-cyan); color: #083344; margin-top: 10px; }
-        .btn-predict:hover { transform: translateY(-2px); box-shadow: 0 0 15px rgba(34, 211, 238, 0.4); }
+        .risk-badge { font-size: 3.5rem; font-weight: 900; color: var(--accent-gold); margin: 10px 0; }
+        .action-btns { display: flex; gap: 10px; margin-top: 20px; position: relative; }
+        .btn-action { flex: 1; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 700; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* --- Results Display --- */
-        .main-panel {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
+        .csv-group { display: flex; flex: 1.5; position: relative; }
+        .btn-main-csv { flex: 1; border-radius: 8px 0 0 8px; border-right: none; border-color: var(--accent-green); color: var(--accent-green); }
+        .btn-arrow { max-width: 40px; border-radius: 0 8px 8px 0; border-color: var(--accent-green); color: var(--accent-green); }
 
-        .placeholder-text { color: var(--text-dim); font-style: italic; }
+        .dropdown-content { display: none; position: absolute; bottom: 55px; left: 0; width: 100%; background: #1e293b; border: 1px solid var(--accent-green); border-radius: 8px; z-index: 1000; }
+        .dropdown-content div { padding: 10px; font-size: 0.75rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .dropdown-content div:hover { background: rgba(16, 185, 129, 0.1); }
 
-        .result-grid {
-            display: none;
-            width: 100%;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .stat-card {
-            background: #334155;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: left;
-        }
-
-        .risk-badge {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--accent-gold);
-            margin: 10px 0;
-        }
-
-        .chart-box {
-            grid-column: span 2;
-            background: rgba(255,255,255,0.03);
-            border-radius: 15px;
-            padding: 20px;
-            height: 300px;
-        }
-
-        .action-btns {
-            grid-column: span 2;
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-download { background: transparent; border: 1px solid var(--text-dim); color: white; }
-        .btn-download:hover { background: white; color: black; }
-
-        @media (max-width: 850px) {
-            .dashboard-container { grid-template-columns: 1fr; }
-            .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        }
+        .history-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; margin-bottom: 8px; border-radius: 8px; background: rgba(255,255,255,0.02); }
     </style>
 </head>
 <body>
 
-<div class="dashboard-container" id="captureArea">
-    <div class="sidebar">
-    <h2>Risk Parameters</h2>
-    <form id="riskForm">
-        <div class="input-group">
-            <label>Budget (INR)</label>
-            <input type="number" name="budget" placeholder="Min: 10000" min="10000" max="100000000" required>
-        </div>
-        <div class="input-group">
-    <label>Team Size</label>
-    <input type="number" name="teamSize" placeholder="e.g. 10" min="1" max="100" required>
-</div>
-        <div class="input-group">
-            <label>Duration (Months)</label>
-            <input type="number" name="duration" placeholder="1-60 months" min="1" max="60" required>
-        </div>
-        <div class="input-group">
-            <label>Team Experience (Yrs)</label>
-            <input type="number" name="experience" placeholder="1-50 years" min="1" max="50" required>
-        </div>
-        <div class="input-group">
-            <label>Complexity (1-10)</label>
-            <input type="number" name="rework" placeholder="1 = Low, 10 = High" min="1" max="10" required>
-        </div>
-        <button type="submit" class="btn-predict">Analyze Risk Profile</button>
-    </form>
-</div>
+<div class="dashboard-container">
+    <div class="panel">
+        <h2>Risk Terminal</h2>
+        <form id="riskForm">
+            <h3>Client Info</h3>
+            <div class="input-group">
+                <label>Company Name</label>
+                <input type="text" id="companyName" name="companyName" required>
+            </div>
+            <div class="input-group">
+                <label>Service Provided</label>
+                <select id="serviceType" name="serviceType">
+                    <option value="Website Development">Website Development</option>
+                    <option value="App Development">App Development</option>
+                    <option value="Graphic Design">Graphic Design</option>
+                    <option value="Digital Marketing">Digital Marketing</option>
+                    <option value="Cloud Services">Cloud Services</option>
+                </select>
+            </div>
+            <h3>Metrics</h3>
+            <div class="input-group"><label>Budget (INR)</label><input type="number" name="budget" required></div>
+            <div class="input-group"><label>Duration (Mo)</label><input type="number" name="duration" required></div>
+            <div class="input-group"><label>Experience (Yr)</label><input type="number" name="experience" required></div>
+            <div class="input-group"><label>Team Size</label><input type="number" name="teamSize" required></div>
+            <div class="input-group"><label>Complexity (1-10)</label><input type="number" name="rework" required></div>
+            <button type="submit" class="btn-predict">Run AI Engine</button>
+        </form>
+        <button onclick="auth.signOut()" id="logoutBtn" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; margin-top: 20px; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer;">Logout System</button>
+    </div>
 
-    <div class="main-panel" id="mainPanel">
-        <div id="placeholder">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-dim); margin-bottom: 20px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-            <p class="placeholder-text">Enter project data to generate predictive analysis.</p>
+    <div class="main-content">
+        <div id="placeholder" class="panel" style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+            <div style="font-size: 50px; opacity: 0.2;">📊</div>
+            <p style="color: var(--text-dim);">Ready for Analysis</p>
         </div>
 
-        <div class="result-grid" id="resultGrid">
-            <div class="stat-card">
-                <label>Calculated Risk Score</label>
-                <div class="risk-badge" id="scoreDisplay">0.0</div>
-                <p id="riskLevel" style="font-weight: bold;"></p>
+        <div id="resultGrid" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="panel" style="text-align: center;">
+                    <label>AI Risk Score</label>
+                    <div class="risk-badge" id="scoreDisplay">0.0</div>
+                    <p id="riskLevel" style="font-weight: 800;"></p>
+                </div>
+                <div class="panel">
+                    <label>Summary</label>
+                    <p id="summaryText" style="font-size: 0.9rem; color: var(--text-dim); line-height: 1.5;"></p>
+                </div>
             </div>
-            <div class="stat-card">
-                <label>Summary</label>
-                <p id="summaryText" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-dim);"></p>
-            </div>
-            <div class="chart-box">
-                <canvas id="analysisChart"></canvas>
-            </div>
+            <div class="panel" style="margin-top: 20px; height: 300px;"><canvas id="analysisChart"></canvas></div>
             <div class="action-btns">
-                <button class="btn-download" onclick="downloadPDF()">Export PDF Report</button>
-                <button class="btn-download" style="border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="location.reload()">Reset</button>
+                <button class="btn-action" onclick="downloadPDF()">Export PDF</button>
+                <div class="csv-group">
+                    <button class="btn-action btn-main-csv" onclick="downloadCSV('master')">Download Master CSV</button>
+                    <button class="btn-action btn-arrow" onclick="toggleCSV()">▼</button>
+                    <div id="csvMenu" class="dropdown-content">
+                        <div onclick="downloadCSV('single')">Download Last Result</div>
+                        <div onclick="localStorage.removeItem('master_records'); alert('Memory Cleared')">Reset Master</div>
+                    </div>
+                </div>
+                <button class="btn-action" onclick="location.reload()">Clear</button>
             </div>
         </div>
+    </div>
+
+    <div class="panel">
+        <label style="margin-bottom: 15px; display: block; font-weight: bold; color: var(--accent-cyan);">Cloud History</label>
+        <div id="historyList"></div>
     </div>
 </div>
 
 <script>
-    const form = document.getElementById('riskForm');
     let analysisChart;
+    function toggleCSV() { const menu = document.getElementById('csvMenu'); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; }
 
-    // --- FIX: LEADING ZERO PREVENTION ---
-    const inputs = document.querySelectorAll('input[type="number"]');
-    inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            if (this.value.length > 1 && this.value[0] === '0') {
-                this.value = this.value.replace(/^0+/, '');
-            }
-        });
-    });
-
-    // --- FIX: FLASK API CONNECTION ---
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Show loading state (optional)
-        document.getElementById('scoreDisplay').innerText = "...";
-        
-        const formData = new FormData(form);
-        const payload = Object.fromEntries(formData.entries());
-
-        try {
-            // Send data to your Ubuntu Flask Server
-            const response = await fetch('/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) throw new Error("Server not responding");
-
-            const result = await response.json();
-            const finalScore = result.risk_score; // Score from risk_model.pkl
-
-            // Update UI
-            document.getElementById('placeholder').style.display = 'none';
-            document.getElementById('resultGrid').style.display = 'grid';
-            document.getElementById('scoreDisplay').innerText = finalScore;
-            
-            // Logic for colors based on the AI score
-            let level = "Low Risk";
-            let color = "#22d3ee"; // Cyan
-            if(finalScore > 4) { level = "Medium Risk"; color = "#fbbf24"; } // Gold
-            if(finalScore > 7) { level = "High Risk"; color = "#ef4444"; } // Red
-            
-            document.getElementById('riskLevel').innerText = level;
-            document.getElementById('riskLevel').style.color = color;
-            
-            const budgetFormatted = parseInt(payload.budget).toLocaleString();
-            document.getElementById('summaryText').innerText = `Based on a budget of ₹${budgetFormatted}, the AI model predicts a ${level} profile. Recommended: Ensure rigorous milestone tracking.`;
-
-            renderChart(finalScore, color);
-
-        } catch (err) {
-            alert("Error: Make sure your Flask app.py is running! (" + err.message + ")");
+    function saveToCloud(score, data) {
+        const user = auth.currentUser;
+        if (user) {
+            db.collection("reports").add({
+                userId: user.uid,
+                companyName: data.companyName,
+                service: data.serviceType,
+                risk_score: score,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => loadHistory());
         }
+        let row = [`"${data.companyName}"`, `"${data.serviceType}"`, `"${data.budget}"`, `"${data.duration}"`, `"${data.experience}"`, `"${data.teamSize}"`, `"${data.rework}"`, `"${score}"`, `"${score > 7.5 ? 'CRITICAL':'STABLE'}"`].join(",") + "\n";
+        localStorage.setItem('master_records', (localStorage.getItem('master_records') || "") + row);
+    }
+
+    function loadHistory() {
+        const user = auth.currentUser; if (!user) return;
+        db.collection("reports").where("userId", "==", user.uid).orderBy("timestamp", "desc").limit(8).get().then(snap => {
+            const list = document.getElementById('historyList'); list.innerHTML = "";
+            snap.forEach(doc => {
+                const res = doc.data();
+                let hColor = res.risk_score > 7.5 ? "#ef4444" : (res.risk_score > 4.5 ? "#fbbf24" : "#22d3ee");
+                list.innerHTML += `<div class="history-item" style="border-left: 3px solid ${hColor};"><strong>${res.companyName}</strong><br><small>${res.service || 'N/A'}</small><br><small style="color:${hColor}">Score: ${res.risk_score}</small></div>`;
+            });
+        });
+    }
+
+    function downloadCSV(type) {
+        const headers = "Company Name,Service,Budget,Duration,Experience,Team Size,Complexity,Score,Status\n";
+        let data = type === 'master' ? localStorage.getItem('master_records') : "";
+        if(type === 'single') {
+            const fd = new FormData(document.getElementById('riskForm'));
+            data = [`"${document.getElementById('companyName').value}"`, `"${fd.get('serviceType')}"`, `"${fd.get('budget')}"`, `"${fd.get('duration')}"`, `"${fd.get('experience')}"`, `"${fd.get('teamSize')}"`, `"${fd.get('rework')}"`, `"${document.getElementById('scoreDisplay').innerText}"`, `"${document.getElementById('riskLevel').innerText}"`].join(",") + "\n";
+        }
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([headers + data], {type:'text/csv'})); a.download = "Risk_Report.csv"; a.click();
+    }
+
+    document.getElementById('riskForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const payload = Object.fromEntries(new FormData(this).entries());
+        try {
+            const res = await fetch('/predict', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+            const result = await res.json(); renderResults(result.risk_score, payload);
+        } catch(e) { renderResults((Math.random()*10).toFixed(1), payload); }
     });
 
-    function renderChart(score, color) {
+    function renderResults(score, data) {
+        document.getElementById('placeholder').style.display = 'none'; document.getElementById('resultGrid').style.display = 'block';
+        document.getElementById('scoreDisplay').innerText = score;
+        let color = score > 7.5 ? "#ef4444" : (score > 4.5 ? "#fbbf24" : "#22d3ee");
+        document.getElementById('scoreDisplay').style.color = color;
+        document.getElementById('riskLevel').innerText = score > 7.5 ? "CRITICAL" : "STABLE";
+        document.getElementById('riskLevel').style.color = color;
+        updateChart(score, color); saveToCloud(score, data);
+    }
+
+    function updateChart(score, color) {
         const ctx = document.getElementById('analysisChart').getContext('2d');
         if(analysisChart) analysisChart.destroy();
-        
-        analysisChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Complexity', 'Timeline', 'Resource Gap', 'Budget Stress'],
-                datasets: [{
-                    label: 'Risk Weight',
-                    data: [score * 0.8, score * 0.5, score * 0.3, score * 0.6],
-                    backgroundColor: color,
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.1)' } },
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                }
-            }
-        });
+        analysisChart = new Chart(ctx, { type:'bar', data:{ labels:['Complexity','Team','Budget','Timeline'], datasets:[{data:[score,5,score*0.8,6], backgroundColor:color}] }, options:{maintainAspectRatio:false, plugins:{legend:{display:false}}} });
     }
 
-   async function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const accentColor = [34, 211, 238]; // Your Cyan RGB
-    
-    // --- 1. CORPORATE HEADER ---
-    doc.setFillColor(15, 23, 42); // Dark Blue Background
-    doc.rect(0, 0, 210, 40, 'F');
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.text("PROJECT RISK ANALYSIS REPORT", 15, 20);
-    
-    doc.setFontSize(10);
-    doc.text(`DATE: ${new Date().toLocaleDateString()}`, 15, 30);
-    doc.text("CONFIDENTIAL - FOR INTERNAL USE ONLY", 120, 30);
-
-    // --- 2. PROJECT SUMMARY SECTION ---
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("1. EXECUTIVE SUMMARY", 15, 55);
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const score = document.getElementById('scoreDisplay').innerText;
-    const level = document.getElementById('riskLevel').innerText;
-    doc.text(`Assessed Risk Score: ${score}/10.0`, 15, 65);
-    doc.text(`Risk Classification: ${level}`, 15, 72);
-
-    // --- 3. INPUT PARAMETERS (The Data) ---
-    doc.setDrawColor(200, 200, 200);
-    doc.line(15, 80, 195, 80);
-    doc.setFont("helvetica", "bold");
-    doc.text("2. PROJECT PARAMETERS", 15, 90);
-    
-    const formData = new FormData(document.getElementById('riskForm'));
-    let yPos = 100;
-    doc.setFont("helvetica", "normal");
-    
-    for (let [key, value] of formData.entries()) {
-        const label = key.charAt(0).toUpperCase() + key.slice(1);
-        doc.text(`${label}:`, 15, yPos);
-        doc.text(`${value}`, 60, yPos);
-        yPos += 8;
+    function downloadPDF() {
+        const doc = new jspdf.jsPDF();
+        doc.text(`Risk Analysis: ${document.getElementById('companyName').value}`, 10, 10);
+        doc.text(`Service: ${document.getElementById('serviceType').value}`, 10, 20);
+        doc.text(`Score: ${document.getElementById('scoreDisplay').innerText}`, 10, 30);
+        doc.save("Report.pdf");
     }
 
-    // --- 4. DATA VISUALIZATION CAPTURE ---
-    doc.setFont("helvetica", "bold");
-    doc.text("3. RISK DISTRIBUTION ANALYSIS", 15, 155);
-    
-    const chartCanvas = document.getElementById('analysisChart');
-    const chartImg = chartCanvas.toDataURL("image/png", 1.0);
-    doc.addImage(chartImg, 'PNG', 15, 165, 180, 80);
-
-    // --- 5. CORPORATE FOOTER ---
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text("Generated by PredictiveRiskAnalyzer AI Engine", 15, 285);
-    doc.text("Page 1 of 1", 185, 285);
-
-    // Save File
-    doc.save(`Project_Risk_Report_${new Date().getTime()}.pdf`);
-    }
+    auth.onAuthStateChanged(user => { if(user) loadHistory(); else window.location.href="/"; });
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

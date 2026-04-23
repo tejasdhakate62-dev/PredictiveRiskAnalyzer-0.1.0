@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Analyzer Pro | Register</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrM7ZB-wBeujDvQKW0hbf-Ne_12vMRdTY",
+            authDomain: "predective-project-risk-analyz.firebaseapp.com",
+            projectId: "predective-project-risk-analyz",
+            storageBucket: "predective-project-risk-analyz.firebasestorage.app",
+            messagingSenderId: "873812909340",
+            appId: "1:873812909340:web:8fd98d3765df736041eed9"
+        };
+
+        // Initialize Firebase Safely
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+    </script>
+
+    <style>
+        :root {
+            --bg-deep: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --accent-cyan: #22d3ee;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--text-main);
+        }
+
+        .signup-card {
+            width: 90%; max-width: 400px;
+            background: var(--card-bg);
+            padding: 40px; border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 { color: var(--accent-cyan); margin-bottom: 5px; font-size: 1.6rem; }
+        p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 25px; }
+
+        .input-group { text-align: left; margin-bottom: 18px; }
+        label { display: block; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; font-weight: 600; }
+
+        input {
+            width: 100%; padding: 13px;
+            background: #0f172a; border: 1px solid #334155;
+            border-radius: 10px; color: white;
+            box-sizing: border-box; font-size: 0.95rem;
+        }
+
+        input:focus { border-color: var(--accent-cyan); outline: none; box-shadow: 0 0 5px var(--accent-cyan); }
+
+        .btn-signup {
+            width: 100%; padding: 15px;
+            background: var(--accent-cyan); color: #083344;
+            border: none; border-radius: 10px;
+            font-weight: 800; cursor: pointer;
+            text-transform: uppercase; margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-signup:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(34, 211, 238, 0.3); }
+        .btn-signup:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .links-container { margin-top: 25px; display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; }
+        .links-container a { color: var(--text-dim); text-decoration: none; }
+        .links-container a:hover { color: var(--accent-cyan); text-decoration: underline; }
+        .login-highlight { color: var(--accent-cyan) !important; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="signup-card">
+        <h1>Create Account</h1>
+        <p>Join the Risk Analyzer Network</p>
+
+        <form id="signupForm">
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="John Doe" required>
+            </div>
+
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="name@company.com" required>
+            </div>
+
+            <div class="input-group">
+                <label>Choose Password</label>
+                <input type="password" id="password" placeholder="••••••••" required minlength="6">
+            </div>
+
+            <button type="submit" class="btn-signup" id="regBtn">Register Now</button>
+        </form>
+
+        <div class="links-container">
+            <a href="/forgot-password">Forgot Password?</a>
+            <span>Already have an account? <a href="/" class="login-highlight">Login here</a></span>
+        </div>
+    </div>
+
+    <script>
+        // Form Logic
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('regBtn');
+
+            btn.innerText = "CREATING ACCOUNT...";
+            btn.disabled = true;
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert("Account Created Permanently! ✅");
+                    window.location.href = "/"; // Login page par bhejein
+                })
+                .catch((error) => {
+                    btn.innerText = "REGISTER NOW";
+                    btn.disabled = false;
+                    
+                    // User-friendly errors
+                    if (error.code === 'auth/email-already-in-use') {
+                        alert("Problem: This Email Already Registered.");
+                    } else {
+                        alert("Error: " + error.message);
+                    }
+                });
+        });
+    </script>
+</body>
+</html>
